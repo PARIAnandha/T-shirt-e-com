@@ -1,21 +1,58 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import {
-    Box,
-    Grid,
-    Card,
-    CardContent,
-    CardMedia,
-    Typography,
-    Button,
-  } from '@mui/material';
-  import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-  import StarIcon from '@mui/icons-material/Star';
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Button,
+  CircularProgress,
+} from '@mui/material';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import StarIcon from '@mui/icons-material/Star';
+
+import { getAllProducts } from '../../../api/productAPI';
+
 const Addcart = () => {
-    const products = [
-        { id: 1, name: 'Product A', price: '$50', image: 'https://via.placeholder.com/150', rating: 4.5 },
-        { id: 2, name: 'Product B', price: '$75', image: 'https://via.placeholder.com/150', rating: 4.0 },
-        { id: 3, name: 'Product C', price: '$100', image: 'https://via.placeholder.com/150', rating: 5.0 },
-      ];
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllProducts();
+      setProducts(response); // Assume response contains product list
+    } catch (err) {
+      setError('Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ textAlign: 'center', mt: 4 }}>
+        <Typography variant="h6" color="error">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <Typography variant="h4" sx={{ mb: 3, textAlign: 'center', fontWeight: 'bold' }}>
@@ -25,23 +62,39 @@ const Addcart = () => {
         {products.map((product) => (
           <Grid item xs={12} sm={6} md={4} key={product.id}>
             <Card sx={{ maxWidth: 345, boxShadow: 3, borderRadius: 2 }}>
-              <CardMedia
-                component="img"
-                alt={product.name}
-                height="140"
-                image={product.image}
-              />
+              <Box sx={{ display: 'flex', overflowX: 'auto', p: 1 }}>
+                {product.images && product.images.length > 0 ? (
+                  product.images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`Product ${index + 1}`}
+                      style={{
+                        width: '150px',
+                        height: '150px',
+                        marginRight: '5px',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  ))
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No images available
+                  </Typography>
+                )}
+              </Box>
               <CardContent>
                 <Typography gutterBottom variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
                   {product.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Price: {product.price}
+                  Price: {product.price ? `$${product.price}` : 'N/A'}
                 </Typography>
                 <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
                   <StarIcon sx={{ color: '#FFD700', mr: 0.5 }} />
                   <Typography variant="body2" color="text.secondary">
-                    {product.rating} / 5
+                    {product.rating ? `${product.rating} / 5` : 'No Rating'}
                   </Typography>
                 </Box>
                 <Button
@@ -58,7 +111,7 @@ const Addcart = () => {
         ))}
       </Grid>
     </Box>
-  )
-}
+  );
+};
 
-export default Addcart
+export default Addcart;
