@@ -1,28 +1,45 @@
+// src/components/Signup.js
+
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Container, InputAdornment, Box } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { signup } from '../../api/loginIntegrate'; // Import the signup API function
 
 const Signup = () => {
-  const [name, setName] = useState('');
+  const [username, setusername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null); // Error state for displaying errors
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle signup logic here (e.g., make an API call)
-    console.log('Name:', name);
-    console.log('Email:', email);
-    console.log('Password:', password);
+    try {
+      const userData = { username, email, password };
+      const response = await signup(userData); // Call the signup API function
+      console.log("Signup successful:", response);
+      navigate('/'); // Redirect to login page after successful signup
+    } catch (error) {
+      console.error("Signup error:", error.response ? error.response.data : error.message);
+      setError(
+        error.response && error.response.data && error.response.data.message
+          ? error.response.data.message
+          : "An error occurred during signup. Please try again."
+      ); // Display error to user
+    }
   };
+  
 
   return (
     <Container maxWidth="xs" sx={{ padding: '3rem', backgroundColor: '#fafafa', borderRadius: '8px', boxShadow: 3 }}>
       <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', color: '#00796b' }}>
         Sign Up
       </Typography>
+
+      {error && <Typography color="error" sx={{ textAlign: 'center', marginBottom: '1rem' }}>{error}</Typography>}
 
       <form onSubmit={handleSubmit}>
         <TextField
@@ -31,8 +48,8 @@ const Signup = () => {
           variant="outlined"
           fullWidth
           margin="normal"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={username}
+          onChange={(e) => setusername(e.target.value)}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">

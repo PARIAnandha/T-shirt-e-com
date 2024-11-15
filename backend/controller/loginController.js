@@ -11,13 +11,13 @@ exports.signup = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    const user = new User({ username, email, password });
-    await user.save();
-
-    const token = createToken(user);
-    res.status(201).json({ message: "User created successfully", token });
+    // Your user creation logic here (e.g., using Mongoose to create a user)
+    const newUser = new User({ username, email, password });
+    await newUser.save();
+    res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
-    res.status(400).json({ message: "User creation failed", error: error.message });
+    console.error('Error creating user:', error);
+    res.status(500).json({ message: 'User creation failed', error: error.message });
   }
 };
 
@@ -34,6 +34,7 @@ exports.login = async (req, res) => {
     const token = createToken(user);
     res.json({ message: "Logged in successfully", token });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: "Login failed", error: error.message });
   }
 };

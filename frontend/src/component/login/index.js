@@ -4,18 +4,34 @@ import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { login } from '../../api/loginIntegrate'; // Adjust the path to your API call logic
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here (e.g., make an API call)
-    console.log('Email:', email);
-    console.log('Password:', password);
+    try {
+      const response = await login({ email, password }); // Make sure the API returns a token
+
+      if (response.token) {
+        // Store token in localStorage if login is successful
+        localStorage.setItem('authToken', response.token);
+        console.log('Login successful:', response);
+
+        // Redirect to the home page after successful login
+        navigate('/home');
+      } else {
+        setError('Login failed. Please check your credentials and try again.');
+      }
+    } catch (error) {
+      setError('Login failed. Please check your credentials and try again.');
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -72,6 +88,12 @@ const Login = () => {
           sx={{ marginBottom: '1.5rem' }}
         />
 
+        {error && (
+          <Typography variant="body2" color="error" sx={{ marginBottom: '1rem', textAlign: 'center' }}>
+            {error}
+          </Typography>
+        )}
+
         <Button
           type="submit"
           variant="contained"
@@ -88,7 +110,6 @@ const Login = () => {
           Login
         </Button>
 
-        {/* Links */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
           <Link to="/forgetpassword" style={{ color: '#00796b', textDecoration: 'none', fontWeight: '600' }}>
             Forgot Password?
